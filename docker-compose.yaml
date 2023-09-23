@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  mysql_server:
+    image: mysql
+    container_name: container_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: '123'
+      MYSQL_PASSWORD: '123'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: 'idealista'
+    restart: always
+    ports:
+      - "3306:3306"

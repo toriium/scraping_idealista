@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "scraping-idealista"
+version = "0.1.0"
+description = ""
+authors = ["jorgepvasconcelos"]
+readme = "README.md"
+packages = [{include = "scraping_idealista"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+#turbocrawler = "*"
+parsel = "*"
+requests = "*"
+sqlalchemy = "*"
+alembic = "*"
+pydantic = "*"
+mysql-connector-python = "*"
+python-dotenv = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
