@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, Integer, String, Text, Boolean
+from sqlalchemy import Column, DateTime, Integer, String, Text, Boolean, func
 from data.db_orm.tables.base import Base
 
 
@@ -15,6 +15,7 @@ class TblHouses(Base):
     district = Column(String(100), nullable=False, index=True)
     address = Column(String(500), nullable=False)
     url = Column(Text(), nullable=False)
+    updated_at = Column(DateTime(), nullable=False, server_default=func.now())
 
 
 

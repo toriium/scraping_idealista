@@ -1,4 +1,4 @@
-from pprint import pprint
+from datetime import datetime
 
 from parsel import Selector
 from turbocrawler import CrawlerResponse
@@ -31,8 +31,12 @@ def get_district(location_list: list[str]):
     return location_list[-1].strip().split(',')[-1].strip()
 
 
-def get_description():
-    ...
+def get_description(selector: Selector) -> str:
+    description_list = selector.css('.adCommentsLanguage>p::text').getall()
+    full_description = ""
+    for description in description_list:
+        full_description += f"{description.strip()}\n"
+    return full_description
 
 
 def house_parser(crawler_response: CrawlerResponse):
@@ -40,15 +44,21 @@ def house_parser(crawler_response: CrawlerResponse):
         return
 
     selector = Selector(crawler_response.site_body)
+
+    deactivated_announce = selector.css('[class="deactivated-detail_container"]').get()
+    if deactivated_announce:
+        return
+
+    house_to_buy = selector.css('[class="applyMortgageContainer "]').get()
+    if house_to_buy:
+        return
+
     title = selector.css('.main-info__title-main::text').get()
 
     price = selector.css('.info-data-price>span::text').get()
     price = transform_price(price=price)
 
-    description = selector.css('.adCommentsLanguage>p::text').get()
-    if description:
-        description = description.strip()
-
+    description = get_description(selector=selector)
     kitchen, furnished = get_kitchen_and_furnished(crawler_response.site_body)
 
     location_list = selector.css('.header-map-list::text').getall()
@@ -71,7 +81,7 @@ def house_parser(crawler_response: CrawlerResponse):
         "district": district,
         "address": address,
         "url": crawler_response.site_url,
+        "updated_at": datetime.now(),
     }
     house = HouseDTO(**data)
     HouseRepository.insert_house(house)
-    # pprint(data)

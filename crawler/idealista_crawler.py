@@ -1,8 +1,10 @@
-from pprint import pprint
+from datetime import datetime
 
 import requests
-from parsel import Selector
-from turbocrawler import Crawler, CrawlerRequest, CrawlerResponse, CrawlerRunner
+from turbocrawler import Crawler, CrawlerRequest, CrawlerResponse, CrawlerRunner, ExtractRule
+from turbocrawler.engine.control import StopCrawler
+from turbocrawler.queues.crawled_queue import MemoryCrawledQueue
+from turbocrawler.queues.crawler_queues import FIFOMemoryQueue
 
 from crawler.distritos import DISTRITOS_PORTUGAL
 
@@ -13,7 +15,11 @@ from crawler.idealista_parser import house_parser
 class IdealistaCrawler(Crawler):
     crawler_name = "IdealistaCrawler"
     allowed_domains = ['idealista.pt']
-    regex_rules = [r'^/arrendar-casas/[a-z-]+-distrito/pagina-[0-9]+', r'^/imovel/[0-9]+']
+    main_url = 'https://www.idealista.pt'
+    regex_extract_rules = [
+        ExtractRule(r'https://www.idealista.pt/arrendar-casas/[a-z-]+-distrito/pagina-[0-9]+', remove_crawled=True),
+        ExtractRule(r'https://www.idealista.pt/imovel/[0-9]+')
+    ]
     time_between_requests = 2
 
     session: requests.Session
@@ -33,6 +39,8 @@ class IdealistaCrawler(Crawler):
 
     def process_request(self, crawler_request: CrawlerRequest) -> CrawlerResponse:
         response = self.session.get(crawler_request.site_url, headers=HEADERS, cookies=COOKIES)
+        if response.status_code != 200:
+            raise StopCrawler()
         return CrawlerResponse(site_url=response.url,
                                site_body=response.text,
                                status_code=response.status_code)
@@ -45,4 +53,9 @@ class IdealistaCrawler(Crawler):
         self.session.close()
 
 
-CrawlerRunner(crawler=IdealistaCrawler).run()
+start = datetime.now()
+crawler = IdealistaCrawler
+crawled_queue = MemoryCrawledQueue(crawler_name=crawler.crawler_name, save_crawled_queue=True)
+crawler_queue = FIFOMemoryQueue(crawler_name=crawler.crawler_name, crawled_queue=crawled_queue)
+CrawlerRunner(crawler=crawler, crawler_queue=crawler_queue).run()
+print(f'Process Time {datetime.now() - start}')

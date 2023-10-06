@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -11,3 +13,4 @@ class HouseDTO(BaseModel):
     district: str
     address: str
     url: str
+    updated_at: datetime

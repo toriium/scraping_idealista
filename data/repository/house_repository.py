@@ -1,4 +1,4 @@
-from data.db_orm.query_obj import insert_obj, select_first_obj
+from data.db_orm.query_obj import insert_obj, select_first_obj, select_all_obj
 from data.db_orm.sql_error import SQLError
 from data.db_orm.tables.tbl_houses import TblHouses
 from data.dto.house import HouseDTO
@@ -8,6 +8,10 @@ class HouseRepository:
     @staticmethod
     def get_house_by_url(url):
         return select_first_obj(TblHouses, filter_by={"url": url})
+
+    @staticmethod
+    def get_all_houses_() -> list[TblHouses]:
+        return select_all_obj(TblHouses, dict())
 
     @staticmethod
     def insert_house(house: HouseDTO) -> tuple[HouseDTO | None, SQLError | None]:
