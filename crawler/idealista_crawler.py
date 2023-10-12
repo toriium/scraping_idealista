@@ -1,7 +1,5 @@
-from datetime import datetime
-
 import requests
-from turbocrawler import Crawler, CrawlerRequest, CrawlerResponse, CrawlerRunner, ExtractRule
+from turbocrawler import Crawler, CrawlerRequest, CrawlerResponse, CrawlerRunner, ExtractRule, ExecutionInfo
 from turbocrawler.engine.control import StopCrawler
 from turbocrawler.queues.crawled_queue import MemoryCrawledQueue
 from turbocrawler.queues.crawler_queues import FIFOMemoryQueue
@@ -49,13 +47,11 @@ class IdealistaCrawler(Crawler):
         if 'imovel' in crawler_response.site_url:
             house_parser(crawler_response)
 
-    def stop_crawler(self) -> None:
+    def stop_crawler(self, execution_info: ExecutionInfo) -> None:
         self.session.close()
 
 
-start = datetime.now()
 crawler = IdealistaCrawler
 crawled_queue = MemoryCrawledQueue(crawler_name=crawler.crawler_name, save_crawled_queue=True, load_crawled_queue=True)
 crawler_queue = FIFOMemoryQueue(crawler_name=crawler.crawler_name, crawled_queue=crawled_queue)
 CrawlerRunner(crawler=crawler, crawler_queue=crawler_queue).run()
-print(f'Process Time {datetime.now() - start}')
