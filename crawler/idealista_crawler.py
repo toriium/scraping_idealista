@@ -1,8 +1,9 @@
 import requests
 from turbocrawler import Crawler, CrawlerRequest, CrawlerResponse, CrawlerRunner, ExtractRule, ExecutionInfo
 from turbocrawler.engine.control import StopCrawler
+from turbocrawler.engine.runners.thread_runner import ThreadCrawlerRunner
 from turbocrawler.queues.crawled_queue import MemoryCrawledQueue
-from turbocrawler.queues.crawler_queues import FIFOMemoryQueue
+from turbocrawler.queues.crawler_queues import FIFOMemoryCrawlerQueue
 
 from crawler.distritos import DISTRITOS_PORTUGAL
 
@@ -18,40 +19,45 @@ class IdealistaCrawler(Crawler):
         ExtractRule(r'https://www.idealista.pt/arrendar-casas/[a-z-]+-distrito/pagina-[0-9]+', remove_crawled=True),
         ExtractRule(r'https://www.idealista.pt/imovel/[0-9]+')
     ]
-    time_between_requests = 2
+    time_between_requests = 1
 
     session: requests.Session
 
-    def start_crawler(self) -> None:
-        self.session = requests.session()
+    @classmethod
+    def start_crawler(cls) -> None:
+        cls.session = requests.session()
 
-    def crawler_first_request(self) -> CrawlerResponse | None:
+    @classmethod
+    def crawler_first_request(cls) -> CrawlerResponse | None:
         for distrito in DISTRITOS_PORTUGAL:
             url = f'https://www.idealista.pt/arrendar-casas/{distrito}-distrito/pagina-1'
-            crawler_request = CrawlerRequest(site_url=url)
-            self.crawler_queue.add_request_to_queue(crawler_request=crawler_request)
+            crawler_request = CrawlerRequest(url=url)
+            cls.crawler_queue.add(crawler_request=crawler_request)
 
         url = "https://www.idealista.pt"
-        response = self.session.get(url=url, headers=HEADERS, cookies=COOKIES)
+        response = cls.session.get(url=url, headers=HEADERS, cookies=COOKIES)
         return None
 
-    def process_request(self, crawler_request: CrawlerRequest) -> CrawlerResponse:
-        response = self.session.get(crawler_request.site_url, headers=HEADERS, cookies=COOKIES)
+    @classmethod
+    def process_request(cls, crawler_request: CrawlerRequest) -> CrawlerResponse:
+        response = cls.session.get(crawler_request.url, headers=HEADERS, cookies=COOKIES)
         if response.status_code != 200:
-            raise StopCrawler()
-        return CrawlerResponse(site_url=response.url,
-                               site_body=response.text,
+            raise StopCrawler("response.status_code != 200")
+        return CrawlerResponse(url=response.url,
+                               body=response.text,
                                status_code=response.status_code)
 
-    def parse_crawler_response(self, crawler_response: CrawlerResponse) -> None:
-        if 'imovel' in crawler_response.site_url:
+    @classmethod
+    def parse_crawler_response(cls, crawler_request: CrawlerRequest, crawler_response: CrawlerResponse) -> None:
+        if 'imovel' in crawler_response.url:
             house_parser(crawler_response)
 
-    def stop_crawler(self, execution_info: ExecutionInfo) -> None:
-        self.session.close()
+    @classmethod
+    def stop_crawler(cls, execution_info: ExecutionInfo) -> None:
+        cls.session.close()
 
 
 crawler = IdealistaCrawler
 crawled_queue = MemoryCrawledQueue(crawler_name=crawler.crawler_name, save_crawled_queue=True, load_crawled_queue=True)
-crawler_queue = FIFOMemoryQueue(crawler_name=crawler.crawler_name, crawled_queue=crawled_queue)
+crawler_queue = FIFOMemoryCrawlerQueue(crawler_name=crawler.crawler_name, crawled_queue=crawled_queue)
 CrawlerRunner(crawler=crawler, crawler_queue=crawler_queue).run()

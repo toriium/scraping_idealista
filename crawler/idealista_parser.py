@@ -40,10 +40,10 @@ def get_description(selector: Selector) -> str:
 
 
 def house_parser(crawler_response: CrawlerResponse):
-    if HouseRepository.get_house_by_url(url=crawler_response.site_url):
+    if HouseRepository.get_house_by_url(url=crawler_response.url):
         return
 
-    selector = Selector(crawler_response.site_body)
+    selector = Selector(crawler_response.body)
 
     deactivated_announce = selector.css('[class="deactivated-detail_container"]').get()
     if deactivated_announce:
@@ -59,7 +59,7 @@ def house_parser(crawler_response: CrawlerResponse):
     price = transform_price(price=price)
 
     description = get_description(selector=selector)
-    kitchen, furnished = get_kitchen_and_furnished(crawler_response.site_body)
+    kitchen, furnished = get_kitchen_and_furnished(crawler_response.body)
 
     location_list = selector.css('.header-map-list::text').getall()
     district = get_district(location_list)
@@ -80,7 +80,7 @@ def house_parser(crawler_response: CrawlerResponse):
         "furnished": furnished,
         "district": district,
         "address": address,
-        "url": crawler_response.site_url,
+        "url": crawler_response.url,
         "updated_at": datetime.now(),
     }
     house = HouseDTO(**data)
