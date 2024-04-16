@@ -12,6 +12,7 @@ class TblHouses(Base):
     description = Column(Text(), nullable=True)
     kitchen = Column(Boolean(), nullable=True, index=True)
     furnished = Column(Boolean(), nullable=True, index=True)
+    country = Column(String(100), nullable=False, index=True)
     district = Column(String(100), nullable=False, index=True)
     address = Column(String(500), nullable=False)
     url = Column(Text(), nullable=False)

@@ -78,6 +78,7 @@ def house_parser(crawler_response: CrawlerResponse):
         "description": description,
         "kitchen": kitchen,
         "furnished": furnished,
+        "country": country,
         "district": district,
         "address": address,
         "url": crawler_response.url,

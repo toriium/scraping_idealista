@@ -16,6 +16,7 @@ alembic = "*"
 pydantic = "*"
 mysql-connector-python = "*"
 python-dotenv = "^1.0.0"
+selectolax = "^0.3.21"
 
 
 [build-system]

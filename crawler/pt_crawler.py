@@ -1,20 +1,26 @@
 import requests
-from turbocrawler import Crawler, CrawlerRequest, CrawlerResponse, ExecutionInfo
+from turbocrawler import Crawler, CrawlerRequest, CrawlerResponse, CrawlerRunner, ExtractRule, ExecutionInfo
 from turbocrawler.engine.control import StopCrawler
+from turbocrawler.engine.runners.thread_runner import ThreadCrawlerRunner
+from turbocrawler.queues.crawled_queue import MemoryCrawledQueue
+from turbocrawler.queues.crawler_queues import FIFOMemoryCrawlerQueue
 
 from crawler.distritos import DISTRITOS_PORTUGAL
 
 from crawler.credentials import HEADERS, COOKIES
 from crawler.idealista_parser import house_parser
+from crawler.idealista_crawler import IdealistaCrawler
 
 
-class IdealistaCrawler(Crawler):
+class IdealistaPTCrawler(IdealistaCrawler):
+    crawler_name = "IdealistaPTCrawler"
+    allowed_domains = ['idealista.pt']
+    main_url = 'https://www.idealista.pt'
+    regex_extract_rules = [
+        ExtractRule(r'https://www.idealista.pt/arrendar-casas/[a-z-]+-distrito/pagina-[0-9]+', remove_crawled=True),
+        ExtractRule(r'https://www.idealista.pt/imovel/[0-9]+')
+    ]
     time_between_requests = 1
-
-    session: requests.Session
-
-    def start_crawler(self) -> None:
-        self.session = requests.session()
 
     def crawler_first_request(self) -> CrawlerResponse | None:
         for distrito in DISTRITOS_PORTUGAL:
@@ -35,6 +41,3 @@ class IdealistaCrawler(Crawler):
     def parse(self, crawler_request: CrawlerRequest, crawler_response: CrawlerResponse) -> None:
         if 'imovel' in crawler_response.url:
             house_parser(crawler_response)
-
-    def stop_crawler(self, execution_info: ExecutionInfo) -> None:
-        self.session.close()

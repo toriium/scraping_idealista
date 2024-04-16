@@ -18,3 +18,7 @@ DISTRITOS_PORTUGAL = [
     "vila-real",
     "viseu"
 ]
+
+PROVINCIAS_ESPANHA = [
+    "salamanca"
+]

@@ -22,6 +22,7 @@ class HouseRepository:
         new_house.description = house.description
         new_house.kitchen = house.kitchen
         new_house.furnished = house.furnished
+        new_house.country = house.country
         new_house.district = house.district
         new_house.address = house.address
         new_house.url = house.url
