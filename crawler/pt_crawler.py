@@ -1,14 +1,10 @@
-import requests
-from turbocrawler import Crawler, CrawlerRequest, CrawlerResponse, CrawlerRunner, ExtractRule, ExecutionInfo
+from turbocrawler import CrawlerRequest, CrawlerResponse, ExtractRule
 from turbocrawler.engine.control import StopCrawler
-from turbocrawler.engine.runners.thread_runner import ThreadCrawlerRunner
-from turbocrawler.queues.crawled_queue import MemoryCrawledQueue
-from turbocrawler.queues.crawler_queues import FIFOMemoryCrawlerQueue
 
 from crawler.distritos import DISTRITOS_PORTUGAL
 
 from crawler.credentials import HEADERS, COOKIES
-from crawler.idealista_parser import house_parser
+from crawler.parsers.idealista_parser import house_parser
 from crawler.idealista_crawler import IdealistaCrawler
 
 

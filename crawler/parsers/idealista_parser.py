@@ -1,49 +1,30 @@
 from datetime import datetime
 
 from parsel import Selector
+
+from crawler.parsers.abs_parser import ABCParser
+from crawler.parsers.es_parser import IdealistaESParser
+from crawler.parsers.pt_parser import IdealistaPTParser
 from turbocrawler import CrawlerResponse
 
 from data.dto.house import HouseDTO
 from data.repository.house_repository import HouseRepository
 
 
-def transform_price(price: str):
-    return price.replace('.', '')
+def get_parser(country: str, selector) -> ABCParser:
+    if country == "PT":
+        return IdealistaPTParser(selector)
+
+    if country == "ES":
+        return IdealistaESParser(selector)
 
 
-def get_kitchen_and_furnished(text) -> tuple[bool | None, bool | None]:
-    if 'Mobilado e cozinha equipada' in text:
-        kitchen = True
-        furnished = True
-    elif 'Cozinha equipada e casa sem mobília' in text:
-        kitchen = True
-        furnished = False
-    elif 'Cozinha não equipada e casa sem mobília' in text:
-        kitchen = False
-        furnished = False
-    else:
-        kitchen = None
-        furnished = None
-    return kitchen, furnished
-
-
-def get_district(location_list: list[str]):
-    return location_list[-1].strip().split(',')[-1].strip()
-
-
-def get_description(selector: Selector) -> str:
-    description_list = selector.css('.adCommentsLanguage>p::text').getall()
-    full_description = ""
-    for description in description_list:
-        full_description += f"{description.strip()}\n"
-    return full_description
-
-
-def house_parser(crawler_response: CrawlerResponse):
+def house_parser(crawler_response: CrawlerResponse, country: str):
     if HouseRepository.get_house_by_url(url=crawler_response.url):
         return
 
     selector = Selector(crawler_response.body)
+    parser = get_parser(country=country, selector=selector)
 
     deactivated_announce = selector.css('[class="deactivated-detail_container"]').get()
     if deactivated_announce:
@@ -56,13 +37,13 @@ def house_parser(crawler_response: CrawlerResponse):
     title = selector.css('.main-info__title-main::text').get()
 
     price = selector.css('.info-data-price>span::text').get()
-    price = transform_price(price=price)
+    price = parser.transform_price(price=price)
 
-    description = get_description(selector=selector)
-    kitchen, furnished = get_kitchen_and_furnished(crawler_response.body)
+    description = parser.get_description()
+    kitchen, furnished = parser.get_kitchen_and_furnished(crawler_response.body)
 
     location_list = selector.css('.header-map-list::text').getall()
-    district = get_district(location_list)
+    district = crawler_response.kwargs.get("district")
     address = ''
     for location in location_list:
         location = location.strip()

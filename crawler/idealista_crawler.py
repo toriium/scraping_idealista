@@ -5,7 +5,7 @@ from turbocrawler.engine.control import StopCrawler
 from crawler.distritos import DISTRITOS_PORTUGAL
 
 from crawler.credentials import HEADERS, COOKIES
-from crawler.idealista_parser import house_parser
+from crawler.parsers.idealista_parser import house_parser
 
 
 class IdealistaCrawler(Crawler):
