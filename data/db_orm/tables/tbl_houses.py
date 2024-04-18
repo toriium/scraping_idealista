@@ -9,6 +9,8 @@ class TblHouses(Base):
     site = Column(String(100), nullable=False)
     title = Column(String(500), nullable=False)
     price = Column(Integer(), nullable=False)
+    rooms = Column(Integer(), nullable=True, index=True)
+    square_meters = Column(Integer(), nullable=True, index=True)
     description = Column(Text(), nullable=True)
     kitchen = Column(Boolean(), nullable=True, index=True)
     furnished = Column(Boolean(), nullable=True, index=True)

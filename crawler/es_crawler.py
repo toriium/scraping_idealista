@@ -16,7 +16,7 @@ class IdealistaESCrawler(IdealistaCrawler):
         ExtractRule(r'https://www.idealista.com/alquiler-viviendas/[a-z-]+/pagina-[0-9]+',remove_crawled=True),
         ExtractRule(r'https://www.idealista.com/inmueble/[0-9]+')
     ]
-    time_between_requests = 2
+    time_between_requests = 1
     country = "ES"
 
     def crawler_first_request(self) -> CrawlerResponse | None:

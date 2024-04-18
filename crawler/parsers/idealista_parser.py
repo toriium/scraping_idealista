@@ -39,6 +39,9 @@ def house_parser(crawler_response: CrawlerResponse, country: str):
     price = selector.css('.info-data-price>span::text').get()
     price = parser.transform_price(price=price)
 
+    rooms = parser.get_rooms()
+    square_meters = parser.get_square_meters()
+
     description = parser.get_description()
     kitchen, furnished = parser.get_kitchen_and_furnished(crawler_response.body)
 
@@ -56,6 +59,8 @@ def house_parser(crawler_response: CrawlerResponse, country: str):
         "site": 'idealista',
         "title": title,
         "price": price,
+        "rooms": rooms,
+        "square_meters": square_meters,
         "description": description,
         "kitchen": kitchen,
         "furnished": furnished,

@@ -7,6 +7,8 @@ class HouseDTO(BaseModel):
     site: str
     title: str
     price: int
+    rooms: int
+    square_meters: int
     description: str | None
     kitchen: bool | None
     furnished: bool | None

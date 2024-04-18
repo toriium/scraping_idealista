@@ -19,6 +19,8 @@ class HouseRepository:
         new_house.site = house.site
         new_house.title = house.title
         new_house.price = house.price
+        new_house.rooms = house.rooms
+        new_house.square_meters = house.square_meters
         new_house.description = house.description
         new_house.kitchen = house.kitchen
         new_house.furnished = house.furnished
