@@ -16,4 +16,5 @@ class HouseDTO(BaseModel):
     district: str
     address: str
     url: str
+    created_at: datetime
     updated_at: datetime

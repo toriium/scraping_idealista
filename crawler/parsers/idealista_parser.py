@@ -5,7 +5,7 @@ from parsel import Selector
 from crawler.parsers.abs_parser import ABCParser
 from crawler.parsers.es_parser import IdealistaESParser
 from crawler.parsers.pt_parser import IdealistaPTParser
-from turbocrawler import CrawlerResponse
+from turbocrawler import CrawlerResponse, CrawlerRequest
 
 from data.dto.house import HouseDTO
 from data.repository.house_repository import HouseRepository
@@ -19,9 +19,9 @@ def get_parser(country: str, selector) -> ABCParser:
         return IdealistaESParser(selector)
 
 
-def house_parser(crawler_response: CrawlerResponse, country: str):
-    if HouseRepository.get_house_by_url(url=crawler_response.url):
-        return
+def house_parser(crawler_request: CrawlerRequest, crawler_response: CrawlerResponse, country: str):
+    # if HouseRepository.get_house_by_url(url=crawler_response.url):
+    #     return
 
     selector = Selector(crawler_response.body)
     parser = get_parser(country=country, selector=selector)
@@ -36,9 +36,7 @@ def house_parser(crawler_response: CrawlerResponse, country: str):
 
     title = selector.css('.main-info__title-main::text').get()
 
-    price = selector.css('.info-data-price>span::text').get()
-    price = parser.transform_price(price=price)
-
+    price = parser.get_price()
     rooms = parser.get_rooms()
     square_meters = parser.get_square_meters()
 
@@ -68,7 +66,12 @@ def house_parser(crawler_response: CrawlerResponse, country: str):
         "district": district,
         "address": address,
         "url": crawler_response.url,
+        "created_at": datetime.now(),
         "updated_at": datetime.now(),
     }
     house = HouseDTO(**data)
-    HouseRepository.insert_house(house)
+
+    if crawler_request.kwargs.get("update_house"):
+        HouseRepository.update_house(house)
+    else:
+        HouseRepository.insert_house(house)

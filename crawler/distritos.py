@@ -75,3 +75,4 @@ PROVINCIAS_ESPANHA = [
 
 ]
 
+PROVINCIAS_ESPANHA = ["avila-provincia"]

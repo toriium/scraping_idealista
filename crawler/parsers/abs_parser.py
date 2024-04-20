@@ -14,10 +14,6 @@ class ABCParser(ABC):
         return "".join(ints)
 
     @staticmethod
-    def transform_price(price: str):
-        return price.replace('.', '')
-
-    @staticmethod
     def get_district(location_list: list[str]):
         return location_list[-1].strip().split(',')[-1].strip()
 
@@ -32,6 +28,12 @@ class ABCParser(ABC):
     @abstractmethod
     def get_kitchen_and_furnished(text) -> tuple[bool | None, bool | None]:
         ...
+
+    def get_price(self) -> int:
+        price = self.selector.css('.info-data-price>span::text').get()
+        price = price.replace('.', '')
+        price = int(price)
+        return price
 
     def get_rooms(self) -> int:
         value = self.selector.css("div.info-features > span:nth-child(2)::text").get()
